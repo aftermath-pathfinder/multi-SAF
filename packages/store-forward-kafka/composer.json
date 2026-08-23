@@ -1,0 +1,37 @@
+{
+    "name": "aftermath-pathfinder/store-forward-kafka",
+    "description": "Self-hosted Kafka transport driver for aftermath-pathfinder/store-forward.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["laravel", "store-and-forward", "kafka", "self-hosted"],
+    "require": {
+        "php": "^8.1",
+        "aftermath-pathfinder/store-forward": "*@dev",
+        "longlang/phpkafka": "^1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0|^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "AftermathPathfinder\\StoreForwardKafka\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AftermathPathfinder\\StoreForwardKafka\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AftermathPathfinder\\StoreForwardKafka\\KafkaDriverServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "repositories": [
+        {"type": "path", "url": "../../", "options": {"symlink": true}}
+    ]
+}

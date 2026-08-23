@@ -121,10 +121,28 @@ php artisan store-forward:retry --channel=orders.created
 - `Dispatcher` + `store-forward:work` / `store-forward:retry` Artisan commands.
 - `MessagePublished` / `MessageFailed` events for observability/alerting.
 
+## Multi-cloud drivers
+
+Six driver packages ship in this repo's [`packages/`](packages/) directory
+(a monorepo — see [`packages/README.md`](packages/README.md) for why),
+each independently installable and each proven against a real,
+verified SDK API surface with unit tests that mock the SDK client:
+
+| Package | Platform | Backing service |
+|---|---|---|
+| `store-forward-sqs` | AWS | SQS |
+| `store-forward-pubsub` | GCP | Pub/Sub |
+| `store-forward-mns` | Alibaba Cloud | MNS |
+| `store-forward-kafka` | Self-hosted | Kafka |
+| `store-forward-amqp` | Self-hosted | RabbitMQ |
+| `store-forward-redis-streams` | Self-hosted | Redis Streams |
+
+Switching platforms is a one-line config change
+(`'channels' => ['orders' => ['driver' => 'sqs']]` → `'pubsub'`, etc.) —
+that's the whole point of the `TransportInterface`/`extend()` design above.
+
 ## Roadmap / open questions for the driver packages
 
-- Kafka: `rdkafka` extension vs. a pure-PHP client (portability vs.
-  performance) — likely support both behind the same `KafkaTransport`.
 - Batching: transports that benefit from batch sends (Kafka producer
   flush, SQS `SendMessageBatch`) — `sendBatch()` exists for this; the
   dispatcher could group by channel before calling it.

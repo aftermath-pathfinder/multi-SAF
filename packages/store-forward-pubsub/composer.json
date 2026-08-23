@@ -1,0 +1,37 @@
+{
+    "name": "aftermath-pathfinder/store-forward-pubsub",
+    "description": "Google Cloud Pub/Sub transport driver for aftermath-pathfinder/store-forward.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["laravel", "store-and-forward", "gcp", "pubsub"],
+    "require": {
+        "php": "^8.1",
+        "aftermath-pathfinder/store-forward": "*@dev",
+        "google/cloud-pubsub": "^1.0|^2.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0|^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "AftermathPathfinder\\StoreForwardPubSub\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AftermathPathfinder\\StoreForwardPubSub\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AftermathPathfinder\\StoreForwardPubSub\\PubSubDriverServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "repositories": [
+        {"type": "path", "url": "../../", "options": {"symlink": true}}
+    ]
+}

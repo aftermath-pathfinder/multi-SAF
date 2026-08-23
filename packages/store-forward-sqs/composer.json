@@ -1,0 +1,37 @@
+{
+    "name": "aftermath-pathfinder/store-forward-sqs",
+    "description": "AWS SQS transport driver for aftermath-pathfinder/store-forward.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["laravel", "store-and-forward", "aws", "sqs"],
+    "require": {
+        "php": "^8.1",
+        "aftermath-pathfinder/store-forward": "*@dev",
+        "aws/aws-sdk-php": "^3.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0|^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "AftermathPathfinder\\StoreForwardSqs\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AftermathPathfinder\\StoreForwardSqs\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AftermathPathfinder\\StoreForwardSqs\\SqsDriverServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "repositories": [
+        {"type": "path", "url": "../../", "options": {"symlink": true}}
+    ]
+}

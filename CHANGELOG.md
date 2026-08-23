@@ -8,6 +8,13 @@ once it reaches a tagged `1.0.0`.
 
 ## [Unreleased]
 
+### Added
+- Six transport driver packages under `packages/` (a monorepo), each
+  independently installable: `store-forward-sqs` (AWS), `store-forward-pubsub`
+  (GCP), `store-forward-mns` (Alibaba Cloud), `store-forward-kafka`,
+  `store-forward-amqp`, and `store-forward-redis-streams` (self-hosted).
+  Each ships its own tests (mocking the real SDK client) and README.
+
 ### Fixed
 - `StoreForwardManager` now reads `store-forward.*` config live from the
   container's config repository instead of snapshotting it once at
