@@ -52,11 +52,19 @@ class StoreForwardServiceProvider extends ServiceProvider
                     'migrations/'.date('Y_m_d_His').'_create_store_forward_messages_table.php'
                 ),
             ], 'store-forward-migrations');
-
-            $this->commands([
-                WorkCommand::class,
-                RetryCommand::class,
-            ]);
         }
+
+        // Deliberately NOT gated behind runningInConsole(): that check
+        // reflects how the *current* request was invoked, not whether
+        // Artisan commands will ever be needed. A web request that calls
+        // Artisan::call('store-forward:work', ...) — exactly what the
+        // playground app's "process pending now" button does — triggers
+        // Laravel's console kernel lazily, using commands registered
+        // during THIS boot() call; if registration were skipped here,
+        // that command would never exist for the rest of the request.
+        $this->commands([
+            WorkCommand::class,
+            RetryCommand::class,
+        ]);
     }
 }

@@ -1,0 +1,44 @@
+# Self-hosted brokers for trying the kafka/amqp/redis-streams drivers for
+# real. Run alongside the app however you're running it (`php artisan
+# serve`, ddev, etc.) — this file only provides the brokers, not the app.
+#
+#   docker compose up -d
+#
+# Not exercised in the sandbox this repo was originally built in (no
+# Docker daemon there) — verify it works on your machine, and open an
+# issue/PR if something's off. The Kafka service is adapted from the
+# official bitnami/kafka docker-compose.yml (KRaft mode, single node);
+# see https://github.com/bitnami/containers/blob/main/bitnami/kafka/docker-compose.yml
+services:
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    ports:
+      - "5672:5672"   # AMQP
+      - "15672:15672" # management UI — http://localhost:15672 (guest/guest)
+
+  kafka:
+    image: docker.io/bitnami/kafka:4.3
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka_data:/bitnami
+    environment:
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      # localhost (not blank) so a client running on the host machine —
+      # rather than another container on this same compose network — gets
+      # told to reconnect to somewhere it can actually reach.
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+
+volumes:
+  kafka_data:
+    driver: local

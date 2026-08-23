@@ -1,0 +1,14 @@
+name: store-forward-playground
+type: laravel
+docroot: public
+php_version: "8.3"
+webserver_type: nginx-fpm
+database:
+  type: mariadb
+  version: "10.11"
+# The app defaults to SQLite (see .env) so this bundled database container
+# goes unused unless you switch DB_CONNECTION — kept only because `ddev
+# config --project-type=laravel` expects one.
+use_dns_when_possible: true
+composer_version: "2"
+web_environment: []
