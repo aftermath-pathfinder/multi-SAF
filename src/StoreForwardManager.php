@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AftermathPathfinder\StoreForward;
 
 use AftermathPathfinder\StoreForward\Contracts\StoreInterface;
@@ -29,7 +31,7 @@ class StoreForwardManager
     /** @var array<string, callable(array, Container): TransportInterface> */
     protected array $customCreators = [];
 
-    public function __construct(protected Container $app, protected array $config)
+    public function __construct(protected Container $app)
     {
     }
 
@@ -39,7 +41,7 @@ class StoreForwardManager
      */
     public function transport(?string $name = null): TransportInterface
     {
-        $name ??= $this->config['default'] ?? 'sync';
+        $name ??= $this->config('default', 'sync');
 
         return $this->transports[$name] ??= $this->resolveTransport($name);
     }
@@ -49,8 +51,8 @@ class StoreForwardManager
      */
     public function transportForChannel(string $channel): TransportInterface
     {
-        $driver = $this->config['channels'][$channel]['driver']
-            ?? $this->config['default']
+        $driver = $this->config("channels.{$channel}.driver")
+            ?? $this->config('default')
             ?? 'sync';
 
         return $this->transport($driver);
@@ -72,7 +74,7 @@ class StoreForwardManager
 
         $this->store()->put($envelope);
 
-        if (($this->config['channels'][$channel]['immediate'] ?? false) === true) {
+        if ($this->config("channels.{$channel}.immediate", false) === true) {
             $this->transportForChannel($channel)->send($envelope);
         }
 
@@ -93,7 +95,7 @@ class StoreForwardManager
 
     protected function resolveTransport(string $name): TransportInterface
     {
-        $config = $this->config['drivers'][$name] ?? [];
+        $config = $this->config("drivers.{$name}", []);
 
         if (isset($this->customCreators[$name])) {
             return ($this->customCreators[$name])($config, $this->app);
@@ -105,5 +107,16 @@ class StoreForwardManager
             'queue' => new LaravelQueueTransport($this->app->make('queue')->connection($config['connection'] ?? null), $config['queue'] ?? null),
             default => throw UnknownTransportException::forDriver($name),
         };
+    }
+
+    /**
+     * Read a store-forward config value live from the container's config
+     * repository (rather than a snapshot taken at construction time), so a
+     * `config(['store-forward....' => ...])` made after this manager was
+     * first resolved is still honored.
+     */
+    protected function config(string $key, mixed $default = null): mixed
+    {
+        return $this->app['config']->get("store-forward.{$key}", $default);
     }
 }

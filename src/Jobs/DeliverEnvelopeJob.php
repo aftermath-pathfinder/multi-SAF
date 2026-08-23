@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AftermathPathfinder\StoreForward\Jobs;
 
 use AftermathPathfinder\StoreForward\Envelope;

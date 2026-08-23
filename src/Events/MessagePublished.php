@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AftermathPathfinder\StoreForward\Events;
 
 use AftermathPathfinder\StoreForward\Envelope;

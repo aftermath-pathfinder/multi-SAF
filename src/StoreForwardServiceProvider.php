@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AftermathPathfinder\StoreForward;
 
 use AftermathPathfinder\StoreForward\Console\Commands\RetryCommand;
@@ -15,7 +17,7 @@ class StoreForwardServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__.'/../config/store-forward.php', 'store-forward');
 
         $this->app->singleton('store-forward', function ($app) {
-            return new StoreForwardManager($app, $app['config']['store-forward']);
+            return new StoreForwardManager($app);
         });
 
         $this->app->alias('store-forward', StoreForwardManager::class);

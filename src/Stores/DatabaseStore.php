@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AftermathPathfinder\StoreForward\Stores;
 
 use AftermathPathfinder\StoreForward\Contracts\StoreInterface;

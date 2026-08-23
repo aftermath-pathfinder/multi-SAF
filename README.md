@@ -138,3 +138,46 @@ php artisan store-forward:retry --channel=orders.created
 composer install
 vendor/bin/phpunit
 ```
+
+The suite (47 tests) covers the outbox lifecycle end to end: `Envelope`
+construction/(de)serialization, `DatabaseStore`'s claim/backoff/dead-letter
+transitions, `StoreForwardManager` driver resolution and `extend()`,
+`Dispatcher` retry/dead-letter/event-dispatch behavior and per-channel
+routing, both built-in Artisan commands, and each shipped transport. Every
+class in `src/` has at least one dedicated test file under `tests/`.
+
+## Project quality & maintainability
+
+This package follows the checklist that makes a Composer library both
+worth adopting and safe for another contributor (human or AI) to extend
+without re-deriving intent from scratch:
+
+- **`declare(strict_types=1)`** on every file — type errors surface at the
+  call site, not three functions downstream.
+- **A docblock on every public class explaining *why* it exists**, not
+  just what its methods do — see `CONTRIBUTING.md` rule 4. This is the
+  single highest-leverage thing for AI-assisted maintenance: an assistant
+  (or a new contributor) reading `TransportInterface.php` in isolation
+  should understand *why* it's only two methods without reading the rest
+  of the package.
+- **No hidden config snapshots.** Earlier drafts captured
+  `config('store-forward.*')` once in the manager's constructor; a
+  `config()->set(...)` after first resolution was silently ignored. It now
+  reads live from the container's config repository on every call, so
+  behavior matches what's actually configured, including in tests that
+  change config mid-test.
+- **A CI matrix** (`.github/workflows/tests.yml`) across supported
+  PHP (8.1–8.4) and Laravel (10–12) versions — a package with no CI badge
+  and no version matrix is a package you find out is broken after you've
+  already installed it.
+- **`CONTRIBUTING.md`** codifies the architectural invariants (interface
+  stays small, no new required dependencies, durability logic never lives
+  in a transport) so a contribution doesn't quietly erode the reason the
+  package is split the way it is.
+- **`CHANGELOG.md`** (Keep a Changelog) and **`SECURITY.md`** (private
+  disclosure process) — table stakes for anyone deciding whether to depend
+  on this in production.
+- **`LICENSE.md`**, `.editorconfig`, `.gitattributes` (dev-only files
+  excluded from `composer create-project`/dist archives) — small things
+  that are nonetheless checked by tools like Packagist's quality score and
+  by cautious teams before adding a dependency.

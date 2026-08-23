@@ -3,6 +3,10 @@
     "description": "Transport-agnostic store-and-forward messaging for Laravel — one API over a durable local outbox, forwarding to Kafka, RabbitMQ, SQS, Redis Streams, or Laravel's own queue.",
     "type": "library",
     "license": "MIT",
+    "support": {
+        "issues": "https://github.com/aftermath-pathfinder/multi-SAF/issues",
+        "source": "https://github.com/aftermath-pathfinder/multi-SAF"
+    },
     "keywords": [
         "laravel",
         "store-and-forward",
@@ -33,6 +37,13 @@
         "psr-4": {
             "AftermathPathfinder\\StoreForward\\Tests\\": "tests/"
         }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-html coverage"
+    },
+    "config": {
+        "sort-packages": true
     },
     "extra": {
         "laravel": {
