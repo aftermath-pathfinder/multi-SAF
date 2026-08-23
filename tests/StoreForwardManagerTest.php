@@ -79,6 +79,39 @@ class StoreForwardManagerTest extends TestCase
         $this->assertInstanceOf(LogTransport::class, $manager->transportForChannel('orders'));
     }
 
+    /**
+     * Regression test: a channel name containing a literal dot must not be
+     * misread as a config nesting path. See StoreForwardManager::config()'s
+     * docblock for why channelConfig()/driverConfig() exist.
+     */
+    public function test_transport_for_channel_resolves_correctly_when_the_channel_name_contains_a_dot(): void
+    {
+        $this->app['config']->set('store-forward.channels', [
+            'orders.created' => ['driver' => 'log'],
+        ]);
+
+        $manager = $this->app->make(StoreForwardManager::class);
+
+        $this->assertInstanceOf(LogTransport::class, $manager->transportForChannel('orders.created'));
+    }
+
+    public function test_publish_honors_immediate_when_the_channel_name_contains_a_dot(): void
+    {
+        $sent = [];
+        $transport = new SyncTransport(function ($envelope) use (&$sent) {
+            $sent[] = $envelope;
+        });
+        $manager = $this->app->make(StoreForwardManager::class);
+        $manager->extend('sync', fn () => $transport);
+        $this->app['config']->set('store-forward.channels', [
+            'orders.created' => ['driver' => 'sync', 'immediate' => true],
+        ]);
+
+        $manager->publish('orders.created', ['order_id' => 1]);
+
+        $this->assertCount(1, $sent);
+    }
+
     public function test_publish_sends_immediately_when_the_channel_opts_in(): void
     {
         $sent = [];

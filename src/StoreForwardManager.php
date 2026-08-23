@@ -51,7 +51,7 @@ class StoreForwardManager
      */
     public function transportForChannel(string $channel): TransportInterface
     {
-        $driver = $this->config("channels.{$channel}.driver")
+        $driver = $this->channelConfig($channel)['driver']
             ?? $this->config('default')
             ?? 'sync';
 
@@ -74,7 +74,7 @@ class StoreForwardManager
 
         $this->store()->put($envelope);
 
-        if ($this->config("channels.{$channel}.immediate", false) === true) {
+        if (($this->channelConfig($channel)['immediate'] ?? false) === true) {
             $this->transportForChannel($channel)->send($envelope);
         }
 
@@ -95,7 +95,7 @@ class StoreForwardManager
 
     protected function resolveTransport(string $name): TransportInterface
     {
-        $config = $this->config("drivers.{$name}", []);
+        $config = $this->driverConfig($name);
 
         if (isset($this->customCreators[$name])) {
             return ($this->customCreators[$name])($config, $this->app);
@@ -114,9 +114,35 @@ class StoreForwardManager
      * repository (rather than a snapshot taken at construction time), so a
      * `config(['store-forward....' => ...])` made after this manager was
      * first resolved is still honored.
+     *
+     * $key here must be a *fixed* dot-path this class controls (e.g.
+     * 'default', 'channels', 'drivers') — never build it by interpolating
+     * a channel or driver name, since Laravel's config repository treats
+     * every dot in the path as a nesting separator. A channel literally
+     * named "orders.created" would silently look up channels→orders→created
+     * instead of the intended array key "orders.created" and return null.
+     * That's exactly why channelConfig()/driverConfig() below take the
+     * user-supplied name as a separate argument and index into the
+     * resolved array directly, rather than appending it into this string.
      */
     protected function config(string $key, mixed $default = null): mixed
     {
         return $this->app['config']->get("store-forward.{$key}", $default);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function channelConfig(string $channel): array
+    {
+        return $this->config('channels', [])[$channel] ?? [];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function driverConfig(string $name): array
+    {
+        return $this->config('drivers', [])[$name] ?? [];
     }
 }

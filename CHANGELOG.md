@@ -15,11 +15,36 @@ once it reaches a tagged `1.0.0`.
   `store-forward-amqp`, and `store-forward-redis-streams` (self-hosted).
   Each ships its own tests (mocking the real SDK client) and README.
 
+### Changed
+- Widened `illuminate/support`, `illuminate/database`, `illuminate/queue`
+  (core) and `illuminate/redis` (store-forward-redis-streams) version
+  constraints to include `^13.0`.
+
 ### Fixed
 - `StoreForwardManager` now reads `store-forward.*` config live from the
   container's config repository instead of snapshotting it once at
   construction, so a `config()->set(...)` made after the manager was first
   resolved is honored (affects `default`, `channels.*`, and `drivers.*`).
+- **Channel names containing a literal dot** (e.g. `orders.created`) no
+  longer silently resolve to the default driver instead of their
+  configured one. `transportForChannel()`/`publish()` were building a
+  config lookup by string-interpolating the channel name into a dotted
+  path (`"channels.{$channel}.driver"`); Laravel's config repository
+  treats every dot as a nesting separator, so a channel literally named
+  `orders.created` was read as `channels→orders→created` (nonexistent)
+  rather than the array key `"orders.created"`, silently falling back to
+  `default` with no error thrown. `channelConfig()`/`driverConfig()` now
+  index into the resolved array directly instead of building dotted paths
+  from user-supplied names. Added regression tests.
+- `StoreForwardServiceProvider` now registers `store-forward:work` and
+  `store-forward:retry` unconditionally in `boot()`, rather than only
+  `if ($this->app->runningInConsole())`. That check reflects how the
+  *current* request was invoked, not whether Artisan commands will ever
+  be needed — a web request calling
+  `Artisan::call('store-forward:work', ...)` needs those commands
+  registered during this same `boot()` call, or they never exist for the
+  rest of the request. `publishes()` calls stay console-gated (that's
+  genuinely a `vendor:publish`-only concern).
 
 ### Added
 - Initial package scaffold: `Envelope`, `StoreInterface`/`DatabaseStore`
