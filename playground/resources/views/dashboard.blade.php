@@ -67,7 +67,10 @@
 </head>
 <body>
 <div class="wrap">
-    <h1>store-forward playground</h1>
+    <div style="display:flex; justify-content:space-between; align-items:baseline;">
+        <h1>store-forward playground</h1>
+        <a href="{{ route('settings') }}" style="color: var(--accent); font-size: 13px;">Settings — pick demo.custom's driver →</a>
+    </div>
     <p class="sub">
         Publish a message, then watch it move through the outbox:
         <strong>pending → processing → sent</strong> (or, if the transport

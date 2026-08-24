@@ -47,6 +47,12 @@ return [
         // real broker — fails a fixed percentage of the time so you can
         // watch attempts climb and (eventually) hit sent or dead-letter.
         'demo.flaky' => ['driver' => 'flaky'],
+
+        // Whatever you pick on the /settings page. Nothing writes to this
+        // array at runtime — Settings only ever writes STORE_FORWARD_*
+        // env vars, and this line just reads them back, same as any other
+        // channel. See app/Http/Controllers/SettingsController.php.
+        'demo.custom' => ['driver' => env('STORE_FORWARD_CUSTOM_DRIVER', 'log')],
     ],
 
     /*
@@ -68,7 +74,7 @@ return [
         ],
         'redis-streams' => [
             'connection' => null, // null = default Redis connection
-            'stream' => 'store-forward-playground',
+            'stream' => env('REDIS_ORDERS_STREAM', 'store-forward-playground'),
         ],
         'flaky' => [
             // Chance (0-100) that a send() throws instead of succeeding.
@@ -78,30 +84,40 @@ return [
             'failure_percent' => env('STORE_FORWARD_FLAKY_PERCENT', 60),
         ],
 
-        // Uncomment after `composer require aftermath-pathfinder/store-forward-<x>`
-        // (see the root README for the full driver list):
-        // 'kafka' => [
-        //     'brokers' => env('KAFKA_BROKERS', 'localhost:9092'),
-        //     'topic' => env('KAFKA_TOPIC', 'orders'),
-        // ],
-        // 'amqp' => [
-        //     'host' => env('RABBITMQ_HOST', 'localhost'),
-        //     'queue' => env('RABBITMQ_QUEUE', 'orders'),
-        // ],
-        // 'sqs' => [
-        //     'queue_url' => env('SQS_QUEUE_URL'),
-        //     'region' => env('AWS_DEFAULT_REGION'),
-        // ],
-        // 'pubsub' => [
-        //     'topic_name' => env('PUBSUB_TOPIC'),
-        //     'project_id' => env('GOOGLE_CLOUD_PROJECT'),
-        // ],
-        // 'mns' => [
-        //     'endpoint' => env('MNS_ENDPOINT'),
-        //     'access_id' => env('ALIBABA_ACCESS_KEY_ID'),
-        //     'access_key' => env('ALIBABA_ACCESS_KEY_SECRET'),
-        //     'topic_name' => env('MNS_TOPIC'),
-        // ],
+        // The six blocks below always have a config shape, whether or not
+        // the corresponding package is installed — that's harmless (it's
+        // just an array), and it's what lets /settings write plain env
+        // vars without ever needing to touch this file. Each one only
+        // actually resolves if you `composer require
+        // aftermath-pathfinder/store-forward-<name>` and select it.
+        'sqs' => [
+            'queue_url' => env('SQS_ORDERS_QUEUE_URL'),
+            'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+        ],
+        'pubsub' => [
+            'topic_name' => env('PUBSUB_ORDERS_TOPIC'),
+            'project_id' => env('GOOGLE_CLOUD_PROJECT'),
+            'key_file_path' => env('GOOGLE_APPLICATION_CREDENTIALS'),
+        ],
+        'mns' => [
+            'endpoint' => env('MNS_ENDPOINT'),
+            'access_id' => env('ALIBABA_ACCESS_KEY_ID'),
+            'access_key' => env('ALIBABA_ACCESS_KEY_SECRET'),
+            'topic_name' => env('MNS_ORDERS_TOPIC'),
+        ],
+        'kafka' => [
+            'brokers' => env('KAFKA_BROKERS', 'localhost:9092'),
+            'topic' => env('KAFKA_ORDERS_TOPIC'),
+        ],
+        'amqp' => [
+            'host' => env('RABBITMQ_HOST', 'localhost'),
+            'port' => env('RABBITMQ_PORT', 5672),
+            'user' => env('RABBITMQ_USER', 'guest'),
+            'password' => env('RABBITMQ_PASSWORD', 'guest'),
+            'queue' => env('RABBITMQ_ORDERS_QUEUE', 'orders'),
+        ],
     ],
 
     /*

@@ -85,6 +85,21 @@ redis-cli -n 0 XRANGE "laravel-database-store-forward-playground" - +
 (the `laravel-database-` prefix is Laravel's own Redis key-prefixing, not
 this package's doing.)
 
+## Picking a different infra service (`/settings`)
+
+The dashboard's **Settings** link opens a page listing all six real
+drivers. Pick one, fill in its credentials, and save — it writes plain
+`STORE_FORWARD_*` env vars to `.env` and switches `demo.custom` live, no
+restart needed.
+
+Picking a driver whose package isn't installed in this checkout shows a
+warning with the exact `composer require` command, and changes nothing —
+it won't save a broken config. Only `log` (built-in) and `redis-streams`
+(installed by default, see `CLAUDE.md`) are live out of the box; install
+another driver package first (same path-repo pattern as
+`store-forward-redis-streams` in `composer.json`) to make it selectable
+for real.
+
 ## What's demo-only vs. real
 
 - `demo.log`, `demo.redis` → real driver code, same as any consuming app

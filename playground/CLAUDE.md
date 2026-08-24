@@ -31,9 +31,41 @@ urge to "properly" split it into services/actions/DTOs.
   driver, purely so you can watch retry/backoff/dead-lettering happen
   without taking a real broker down. Not a pattern real driver packages
   follow — see `../packages/README.md` for what those look like.
-- `config/store-forward.php` — three demo channels: `demo.log` (zero
+- `config/store-forward.php` — four demo channels: `demo.log` (zero
   infra), `demo.redis` (a real self-hosted driver — Redis Streams, using
-  whatever Redis your `.env` points at), `demo.flaky` (the fake one above).
+  whatever Redis your `.env` points at), `demo.flaky` (the fake one above),
+  `demo.custom` (whatever driver you picked on `/settings` — see next).
+
+## The Settings page (`/settings`)
+
+`app/Http/Controllers/SettingsController.php` +
+`app/StoreForwardDemo/DriverCatalog.php` +
+`app/Support/EnvFileWriter.php` + `resources/views/settings.blade.php`.
+
+Lets you pick any of the six real drivers for `demo.custom` and fill in
+its credentials, without hand-editing files. Two things worth
+understanding if you touch this:
+
+1. **The litmus test.** `DriverCatalog::isInstalled()` does
+   `class_exists()` on that driver's service provider — real, not a
+   simulation — before letting you switch. Picking an uninstalled driver
+   flashes a warning and changes nothing (`.env` untouched, `demo.custom`
+   unchanged); it never lets you save a config that would throw on the
+   next publish. This is why `providerClass` in `DriverCatalog` uses
+   `SomeNamespace\Class::class` even for classes that don't exist yet in
+   this checkout — that's valid PHP (`::class` is resolved to a string at
+   parse time, no autoload triggered) and exactly what makes the check
+   honest.
+2. **Driver instances are shared by name, not by channel.** If
+   `demo.custom` and `demo.redis` are both set to `redis-streams`, they
+   read the *same* `drivers.redis-streams` config block — changing the
+   stream name for one changes it for both. That's `StoreForwardManager`'s
+   real caching behavior (`$this->transports[$name]`), not a bug in this
+   page; the Settings view says so rather than hiding it.
+
+`EnvFileWriter` is a small, deliberately playground-scoped `.env`
+line-patcher — single-user local tool, no file lock, don't lift it into a
+real app without adding one.
 
 ## How the package is wired in
 
