@@ -14,7 +14,9 @@ jobs:
         php: [8.1, 8.2, 8.3, 8.4]
         laravel: [10.*, 11.*, 12.*]
         exclude:
-          # Laravel 12 dropped support for PHP 8.1.
+          # Laravel 11 and 12 both require PHP ^8.2, dropping PHP 8.1.
+          - php: 8.1
+            laravel: 11.*
           - php: 8.1
             laravel: 12.*
 
