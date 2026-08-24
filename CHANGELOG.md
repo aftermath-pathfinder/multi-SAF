@@ -20,6 +20,19 @@ once it reaches a tagged `1.0.0`.
   library. See that branch's `playground/README.md` and `CLAUDE.md`.
 
 ### Changed
+- **Dropped Laravel 9, 10, and 11 support.** Laravel 10 and 11 are past
+  Laravel's 2-year security-support window (EOL February 2025 and March
+  2026 respectively) and no longer receive security patches; Laravel 9 is
+  further EOL still. Supporting them was tech debt with no offsetting
+  benefit — a security issue found in either can't be fixed upstream.
+  `illuminate/support`/`illuminate/database`/`illuminate/queue` (core) and
+  `illuminate/redis` (store-forward-redis-streams) now require
+  `^12.0|^13.0`; `orchestra/testbench` (dev) now requires `^10.0|^11.0`
+  (the versions matching those two Laravel majors). CI's matrix now tests
+  PHP 8.1-8.4 × Laravel 12.*/13.* only, with the exclude list updated for
+  each version's real minimum PHP (Laravel 12 needs `^8.2`, Laravel 13
+  needs `^8.3`). If you're on Laravel 10 or 11, stay on the last release
+  before this change, or upgrade Laravel first.
 - Widened `illuminate/support`, `illuminate/database`, `illuminate/queue`
   (core) and `illuminate/redis` (store-forward-redis-streams) version
   constraints to include `^13.0`, found necessary when
