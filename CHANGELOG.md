@@ -27,6 +27,20 @@ once it reaches a tagged `1.0.0`.
   scaffolded a Laravel 13 project.
 
 ### Fixed
+- CI's Laravel 10.*/11.* matrix legs were failing composer's dependency
+  resolution entirely (`Your requirements could not be resolved to an
+  installable set of packages`) — not a real conflict, but Composer 2.9's
+  security-advisory blocking (`policy.advisories.block`, default `true`)
+  refusing every `laravel/framework` v10.x/v11.x release because each one
+  has since accumulated at least one published advisory, as any
+  no-longer-latest major version eventually will. Set
+  `config.policy.advisories.block` to `false` in `composer.json` — this
+  only affects which versions composer's *solver* is willing to select
+  for this dev/test install, not a runtime guarantee; consuming apps make
+  their own audit decisions via their own `composer.json`. Verified by
+  reproducing both matrix legs' `composer update` locally after the fix:
+  dependency resolution completes and package installation proceeds (no
+  more solver conflict).
 - `StoreForwardManager` now reads `store-forward.*` config live from the
   container's config repository instead of snapshotting it once at
   construction, so a `config()->set(...)` made after the manager was first
