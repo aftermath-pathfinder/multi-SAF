@@ -27,6 +27,11 @@ once it reaches a tagged `1.0.0`.
   scaffolded a Laravel 13 project.
 
 ### Fixed
+- CI's PHP 8.1 + Laravel 11.* matrix leg was failing dependency
+  resolution (`your php version (8.1.34) does not satisfy that
+  requirement`) — Laravel 11 requires PHP `^8.2`, same as Laravel 12, but
+  `.github/workflows/tests.yml`'s `exclude` list only dropped PHP 8.1 for
+  Laravel 12, not Laravel 11. Added the missing exclude entry.
 - CI's Laravel 10.*/11.* matrix legs were failing composer's dependency
   resolution entirely (`Your requirements could not be resolved to an
   installable set of packages`) — not a real conflict, but Composer 2.9's
